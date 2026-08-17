@@ -1,35 +1,59 @@
 # AQUA MOTIF GACHA — Japanese localization handoff
 
-## Purpose
-6,000候補化と独立して、既存候補の英名・学名に確実な日本語表示名を追加する。
+## Current state (2026-08-17)
+- Candidate pool: 6,000（正規化完全一致の重複 0）
+- Built-in Japanese candidates: 604
+- Verified aliases: 521
+- Localized total: 1,125 / 6,000
+- Unlocalized: 4,875
+- Source coverage: 521 / 521 (100%)
 
-## Current state
-- Candidate pool: 2,304
-- Japanese alias file: `data/ja-names.js`
-- Verified aliases currently stored: 0
-- Built-in Japanese candidate count: first localization task must measure
-- UI already supports Japanese primary display + original-name sublabel + Japanese-aware copy
+## Full-pool automated scan
+`scripts/scan-ja-aliases.js` で候補6,000件をすべて処理した。日本語を既に含む604件も `builtin-japanese` として走査結果に明示的に計上し、残る候補はJAMSTEC BISMaLの学名検索へ照会した。
 
-## Canonical separation
-- Candidate pool: `window.AQUA_SPECIES` from `data/species-*.js`
-- Japanese aliases: `window.AQUA_JA_NAMES` from `data/ja-names.js`
+採用条件は次のすべてを満たす場合に限定した。
+1. BISMaL検索が検索結果一覧ではなく単一の `/bismal/j/view/<id>` タクソンページへ解決する。
+2. タクソンページのタイトルにある日本語名より前の文字列が候補キーと完全一致する。
+3. 同じタイトルに日本語文字を含む和名が明示されている。
 
-Do not add/remove candidates in the Japanese-localization lane.
+曖昧一致、部分一致、属から種への推定、代表種からの類推、翻訳、カタカナ転写は行わない。通信エラーが1件でも残る場合、スクリプトは成果物を確定せず失敗する。
 
-## Accuracy rule
-- Never invent Japanese names.
-- Never map a genus to one representative species' Japanese name.
-- Use an established Japanese taxon/common name at the same taxonomic level when confidently supported.
-- Leave uncertain names untranslated.
+実行結果:
+- `builtin-japanese`: 604
+- `verified`: 521
+- `no-exact-record`: 4,669
+- `no-japanese-name`: 193
+- `name-mismatch`: 13
+- `error`: 0
+- 合計: 6,000
 
-## Parallel workflow
-Run `CODEX_JA_TASK.md` in a separate Codex task from the normal `CODEX_TASK.md` expansion task.
-The Japanese task should normally touch only:
-- `data/ja-names.js`
-- `JA_PROGRESS.json`
-- `JA_HANDOFF.md`
+作業前のverified aliasesは35件で、完全走査により486件増加した。全521件の確認元タクソンURLは `data/ja-sources.json` に保存した。
 
-This minimizes merge conflicts with the 6,000-candidate expansion lane.
+## Regression audit
+既知の誤対応は 0。
+- `Arothron meleagris` → `ミゾレフグ`
+- `Arothron stellatus` → `モヨウフグ`
+- `Euprymna berryi` → `ニヨリミミイカ`
+- `Gymnothorax kidako` → `ウツボ`
+- `Turritopsis dohrnii` → `チチュウカイベニクラゲ`
 
-## Next action
-Measure the current Japanese baseline, then add up to roughly 500 verified Japanese aliases without sacrificing accuracy. Update `JA_PROGRESS.json` with measured values and this handoff with the tests/results.
+`Gymnothorax favagineus` と `Carassius auratus` はBISMaL完全一致検索が単一タクソンページへ解決しなかったため未登録。`Euprymna morsei` と `Enchelycore pardalis` は候補プールに存在しない。
+
+## Audit results
+- 候補数・順序・内容: 不変（species filesは未変更）
+- 全aliasキー: 候補に完全一致
+- source coverage: 521 / 521 (100%)
+- 空値、重複キー、候補外キー、日本語文字のない値: 各0
+- 既知の誤対応: 0
+- JS/JSON構文エラー: 0
+- 10連抽選: 10件かつ重複なし
+- 日本語あり/なしの表示とコピー: 正常
+
+## Re-running
+ネットワーク中断に備える場合は、監査対象外の一時ファイルを指定して再開できる。
+
+```sh
+node scripts/scan-ja-aliases.js --concurrency 16 --resume /tmp/aqua-ja-scan.json
+```
+
+通常実行では毎回6,000候補を新規走査し、一時キャッシュは成功時に削除される。
