@@ -1,9 +1,9 @@
 {
   "candidate_total": 2304,
-  "builtin_japanese": null,
-  "verified_aliases": 0,
-  "localized_total": null,
-  "unlocalized": null,
-  "added_this_task": 0,
-  "note": "First Japanese-localization Codex task must measure builtin Japanese coverage and update all null values."
+  "builtin_japanese": 604,
+  "verified_aliases": 131,
+  "localized_total": 735,
+  "unlocalized": 1569,
+  "added_this_task": 131,
+  "note": "First Japanese-localization batch measured the baseline and added only species-level aliases with a confident taxonomic match."
 }

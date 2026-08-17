@@ -6,9 +6,28 @@
 ## Current state
 - Candidate pool: 2,304
 - Japanese alias file: `data/ja-names.js`
-- Verified aliases currently stored: 0
-- Built-in Japanese candidate count: first localization task must measure
+- Verified aliases currently stored: 131
+- Built-in Japanese candidate count: 604
+- Localized total: 735 / 2,304
+- Unlocalized candidates: 1,569
 - UI already supports Japanese primary display + original-name sublabel + Japanese-aware copy
+
+## Latest batch
+- Added 131 aliases for existing species-level scientific-name candidates.
+- Candidate files were not edited; the measured pool remained 2,304 before and after localization.
+- Every alias key was checked for an exact match in `window.AQUA_SPECIES`.
+- Values were limited to established Japanese names whose species-level match was clear; no genus aliases were added in this batch.
+- Candidates with unclear, conflicting, or merely transliterated Japanese names were left unlocalized. Representative skips include `Electrophorus voltai`, `Muusoctopus robustus`, `Bathynomus raksasa`, and `Echiniscoides sigismundi`.
+
+## Latest audit
+- Candidate count unchanged: pass (2,304 before and after).
+- Normalized exact candidate duplicates: pass (0).
+- Alias keys absent from the candidate pool: pass (0).
+- Empty alias values: pass (0).
+- Alias values without Japanese characters: pass (0).
+- Duplicate object-literal keys / unintended overwrites: pass (0).
+- JavaScript syntax and data loading: pass.
+- Ten-draw uniqueness and localized/unlocalized display/copy paths: pass.
 
 ## Canonical separation
 - Candidate pool: `window.AQUA_SPECIES` from `data/species-*.js`
@@ -32,4 +51,4 @@ The Japanese task should normally touch only:
 This minimizes merge conflicts with the 6,000-candidate expansion lane.
 
 ## Next action
-Measure the current Japanese baseline, then add up to roughly 500 verified Japanese aliases without sacrificing accuracy. Update `JA_PROGRESS.json` with measured values and this handoff with the tests/results.
+Continue with confidently documented species aliases and established same-rank genus names. Re-measure the pool first in case the expansion lane has advanced, and keep uncertain candidates untranslated.
