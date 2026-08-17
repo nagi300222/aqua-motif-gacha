@@ -1,7 +1,7 @@
 const fs = require('fs');
 const vm = require('vm');
 
-const expected = Number(process.argv[2] || 2304);
+const expected = Number(process.argv[2] || 6000);
 const files = fs.readdirSync('data').filter(name => /^species-.*\.js$/.test(name)).sort();
 const context = { window: {} };
 vm.createContext(context);
