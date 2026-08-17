@@ -1,9 +1,10 @@
 {
   "project": "AQUA MOTIF GACHA",
   "target": 6000,
-  "current": 1304,
-  "remaining": 4696,
+  "current": 2304,
+  "added_this_batch": 0,
+  "remaining": 3696,
   "source": "data/species-*.js",
-  "strategy": "name-only fast pool; non-mammalian aquatic animals; exact normalized duplicates forbidden",
-  "next_action": "Codex: add min(1000, 6000-current) verified real aquatic animal names, run checks, update this file and CHAT_HANDOFF.md"
+  "strategy": "name-only fast pool; non-mammalian aquatic animals; exact normalized duplicates and sp./spp./cf./aff. placeholders forbidden",
+  "next_action": "Replace the rejected placeholder batch with 1000 source-verified concrete species or independent common names, then run scripts/audit-species.js 3304"
 }
