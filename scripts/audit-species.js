@@ -12,7 +12,7 @@ for (const file of files) {
 const names = context.window.AQUA_SPECIES;
 const normalize = name => name.normalize('NFKC').trim().toLowerCase();
 const keys = names.map(normalize);
-const forbidden = names.filter(name => /\b(?:sp|spp|cf|aff)\.?\s*$/iu.test(name));
+const forbidden = names.filter(name => /(?:^|\s)(?:sp|spp|cf|aff)\.(?:\s|$)|\?/iu.test(name));
 const errors = [];
 if (names.length !== expected) errors.push(`expected ${expected}, got ${names.length}`);
 if (names.length > 6000) errors.push(`target exceeded: ${names.length}`);
