@@ -3,10 +3,24 @@
 ## Current state (2026-08-17)
 - Candidate pool: 6,000（正規化完全一致の重複 0）
 - Built-in Japanese candidates: 604
-- Verified aliases: 521
-- Localized total: 1,125 / 6,000
-- Unlocalized: 4,875
-- Source coverage: 521 / 521 (100%)
+- Verified aliases: 565
+- Localized total: 1,169 / 6,000
+- Unlocalized: 4,831
+- Source coverage: 565 / 565 (100%)
+
+## Phase 2 full scan (FishPix)
+`scripts/scan-ja-phase2-fishpix.js` で、Phase 1後に未対応だった4,875件を国立科学博物館の魚類写真資料データベース FishPix に対して最後まで走査した。全件の最終ステータスは `data/ja-phase2-status.json` に保存している。
+
+FishPixの学名欄には命名者が含まれるため、検索は部分一致で取得し、結果行の学名が候補と完全一致するか、候補の直後が括弧付き命名者表記である場合だけ採用した。同一学名の全行が単一の日本語名で一致することも必須とした。
+
+最終結果（合計4,875件、通信エラー0件）:
+- `verified`: 44
+- `no-exact-record`: 3,833
+- `not-species-scientific-name`: 996
+- `conflicting-japanese-names`: 1
+- `non-taxon-japanese-label`: 1
+
+`Oryzias latipes` は地域型の異なる2表示が競合したため不採用。`Amphilophus citrinellus` は同じレコードの日本語表示が交雑個体（`×`を含む両親名）で、候補種そのものの和名ではないため不採用とした。曖昧な2件を含め、確認条件を満たさない4,831件は未翻訳のまま維持した。
 
 ## Full-pool automated scan
 `scripts/scan-ja-aliases.js` で候補6,000件をすべて処理した。日本語を既に含む604件も `builtin-japanese` として走査結果に明示的に計上し、残る候補はJAMSTEC BISMaLの学名検索へ照会した。
@@ -27,7 +41,7 @@
 - `error`: 0
 - 合計: 6,000
 
-作業前のverified aliasesは35件で、完全走査により486件増加した。全521件の確認元タクソンURLは `data/ja-sources.json` に保存した。
+Phase 1では作業前35件から486件増加した。Phase 2ではさらに44件増加し、全565件の確認元URLを `data/ja-sources.json` に保存した。
 
 ## Regression audit
 既知の誤対応は 0。
@@ -42,7 +56,7 @@
 ## Audit results
 - 候補数・順序・内容: 不変（species filesは未変更）
 - 全aliasキー: 候補に完全一致
-- source coverage: 521 / 521 (100%)
+- source coverage: 565 / 565 (100%)
 - 空値、重複キー、候補外キー、日本語文字のない値: 各0
 - 既知の誤対応: 0
 - JS/JSON構文エラー: 0
@@ -57,3 +71,9 @@ node scripts/scan-ja-aliases.js --concurrency 16 --resume /tmp/aqua-ja-scan.json
 ```
 
 通常実行では毎回6,000候補を新規走査し、一時キャッシュは成功時に削除される。
+
+Phase 2は確定済みステータスを再利用し、失敗した通信だけを再試行する。
+
+```sh
+node scripts/scan-ja-phase2-fishpix.js --concurrency 12
+```
