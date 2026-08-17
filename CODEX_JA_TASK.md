@@ -1,142 +1,100 @@
-# CODEX JAPANESE TASK — Phase 2 multi-source full scan
+# CODEX JAPANESE TASK — Phase 3 remaining 4,831 multi-source scan
 
-最新 `main` から開始してください。`AGENTS.md`、`JA_PROGRESS.json`、`JA_HANDOFF.md`、`scripts/scan-ja-aliases.js`、`scripts/audit-ja-aliases.js` を先に読み、確認質問なしで最後まで実行してください。過去PR・古いCodexブランチを土台にしないでください。
+最新 `main` から開始してください。`AGENTS.md`、`JA_PROGRESS.json`、`JA_HANDOFF.md`、`data/ja-phase2-status.json`、既存の日本語化スクリプトを先に読み、確認質問なしで最後まで実行してください。過去PR・古いCodexブランチを土台にしないでください。
 
 ## 現在地
 - 候補総数: 6,000
 - 元から日本語: 604
-- BISMaLで検証済みalias: 521
-- 日本語対応済み: 1,125 / 6,000
-- 未対応: 4,875
+- 検証済みalias: 565
+- 日本語対応済み: 1,169 / 6,000
+- 未対応: 4,831
+- Phase 1 BISMaL: 521 alias
+- Phase 2 FishPix: 44 alias追加、4,875件全走査済み
 
-Phase 1では6,000候補をJAMSTEC BISMaLで完全走査済みです。今回の目的は、**現在未対応の4,875件すべてを対象に、日本の別の公的・学術情報源へ自動照合し、確実に確認できたaliasだけ追加すること**です。
+## 今回の目的
+FishPixで未解決の **4,831件すべて** を、FishPix以外の日本の公的・学術情報源へ順次照合し、確実に確認できたaliasだけ追加してください。
 
-# 最重要: 最後まで走らせる
-- 未対応4,875件を**全件処理するまでタスクを完了扱いにしないでください**。
-- 100件、200件、500件、1,000件など途中の件数で停止・報告・PR作成しないでください。
-- 情報源Aで取れなければ情報源B、その次へ進み、各候補について利用可能な優先ソースを最後まで試してください。
-- 一部APIやサイトが失敗しても、その失敗だけを理由にタスクを終了しないでください。別ソースへ切り替えて継続してください。
-- 長時間処理はキャッシュに保存し、再開可能にしてください。
-- 通信エラーが残る場合はリトライ・バックオフ後も未解消の件数を明示し、可能な別ソースを試してください。
-- **全4,875件の最終ステータスが確定するまで成果物を確定しないでください。**
+### 絶対条件
+- **1つの情報源を走査しただけで終了しない。**
+- 100件、500件、1,000件など途中件数で停止・PR作成しない。
+- 各候補について、利用可能な優先ソースを順に試し、次に試せる公的・学術ソースが残っている限り継続する。
+- 全4,831件に「どのソースまで試したか」と最終ステータスが確定するまで成果物を確定しない。
+- 自動アクセスを拒否するサイトは突破しない。`blocked` 等で記録して次ソースへ進む。
+- 長時間処理はキャッシュ保存し、`--resume` 等で再開可能にする。
+- 通信エラーはリトライ・バックオフ後、別ソースへ進む。未解消エラーがあれば件数と対象を残す。
 
 ## 採用条件
-aliasは以下をすべて満たす場合だけ採用してください。
-1. 候補キーの学名と資料中の学名が完全一致する。
-2. 同一ページ・同一レコードに日本語名が明記されている。
-3. 情報源URLを保存できる。
-4. 既存aliasと矛盾しない。矛盾する場合は日本の公的・学術系現行資料で解消できる場合のみ修正する。
+aliasは以下を満たす場合のみ採用。
+1. 候補キーの学名と資料中の学名が完全一致、または資料上で明示された同一タクソンのシノニム。
+2. 同一ページ/同一レコードに日本語名が明記。
+3. 確認元URLを保存可能。
+4. 既存aliasと矛盾しない。矛盾時は日本の現行公的・学術資料で解消できる場合のみ修正。
 
-シノニム経由で採用する場合は、元候補と資料上の名称が同一タクソンであることが同じ資料または信頼できる補助資料で明示確認できる場合だけ採用してください。
+禁止: 機械翻訳、単純カタカナ転写、代表種からの類推、検索スニペットだけで採用、部分一致、Wikipedia/ブログ/通販/まとめだけを根拠、モデル記憶だけで確定。
 
-禁止:
-- 機械翻訳
-- 単純なカタカナ転写
-- 属名から代表種の和名を類推
-- 検索スニペットだけで採用
-- 部分一致・曖昧一致
-- Wikipedia、ブログ、通販、まとめサイトだけを根拠に採用
-- モデルの記憶だけで確定
-
-確認できない候補は未翻訳のまま残すのが正解です。
-
-## Phase 2 情報源の優先順位
-BISMaL Phase 1の再フル走査は不要です。既存521件は保持してください。
-
-未対応4,875件について、可能な範囲で次を順に自動照合してください。
-1. 国立科学博物館 FishPix / UODAS / 淡水魚類・標本関連DB
-2. 国立科学博物館のその他生物・標本DB
+## Phase 3 情報源優先順位
+FishPixはPhase 2済みなので、未解決4,831件に対して次を順に試してください。
+1. 国立科学博物館 UODAS / 淡水魚類 / 標本・その他生物DB
+2. 国立科学博物館のその他公開DB・標本DB
 3. 東京大学など大学博物館・大学研究室・`ac.jp` の学術DB
 4. J-STAGE掲載論文・学会誌・査読資料
 5. 日本の公立水族館・博物館・研究機関の公式種ページ/DB
-6. 日本資料のシノニム確認を補助する場合のみ WoRMS / FishBase 等
-
-自動アクセスを拒否するサイトを回避・突破しないでください。そのソースはスキップし、次へ進んでください。
+6. シノニム確認の補助に限り WoRMS / FishBase 等
 
 ## 実装
-既存 `scripts/scan-ja-aliases.js` はBISMaL Phase 1の再現用として残してください。
+新規に原則 `scripts/scan-ja-phase3-multisource.js` を追加してください。
 
-新規に原則:
-- `scripts/scan-ja-aliases-phase2.js`
+要件:
+- 候補6,000件、正規化重複0を開始時に検証。
+- 既存565 aliasを保持し対象外にする。
+- `data/ja-phase2-status.json` を読み、FishPixでverifiedだった44件を再処理しない。
+- 未対応4,831件を固定入力集合として扱う。
+- 各候補について `attempts` に試したソース名・URL/検索URL・結果を記録。
+- `data/ja-phase3-status.json` に4,831件すべての最終ステータスを保存。
+- ソース別parserを分離し、想定外HTML/JSONは採用しない。
+- concurrency、timeout、retry、指数バックオフ、レート制限配慮、resume対応。
+- 既存 `data/ja-names.js` / `data/ja-sources.json` に追記統合し、既存565件を失わない。
+- 同一候補を複数ソースで確認した場合は、優先順位の高い日本公的・学術ソースを採用。
 
-を追加し、未対応候補だけを処理してください。
-
-Phase 2スクリプト要件:
-- 開始時に候補6,000件、正規化重複0を検証。
-- `data/ja-names.js` の既存521キーを処理対象から除外。
-- 4,875件すべてに最終ステータスを付ける。
-- ソース別の検索・parse処理を分離。
-- 想定外HTML/JSONは採用しない。
-- concurrency指定可能。
-- timeout、retry、指数バックオフ、レート制限配慮。
-- `--resume <file>` 等で再開可能。
-- 一定件数ごとにキャッシュ保存。
-- 同一候補が複数ソースで検証された場合、優先順位の高い日本公的・学術ソースを採用。
-- aliasとsource URLを既存データへ**追記・統合**し、既存521件を失わない。
-- 走査結果のステータス集計を出す。少なくとも `verified-new` / `already-verified` / `no-exact-record` / `no-japanese-name` / `name-mismatch` / `source-conflict` / `error` を区別する。
+最終ステータス例: `verified-new` / `no-record-after-all-sources` / `no-japanese-name` / `name-mismatch` / `source-conflict` / `blocked-all-remaining-sources` / `error`。
 
 ## 既知の回帰
-以下を必ず維持してください。
+必ず維持:
 - `Arothron meleagris` → `ミゾレフグ`
 - `Arothron stellatus` → `モヨウフグ`
 - `Euprymna berryi` → `ニヨリミミイカ`
 - `Gymnothorax kidako` → `ウツボ`
 - `Turritopsis dohrnii` → `チチュウカイベニクラゲ`
-- `Gymnothorax favagineus` は公的資料で同一タクソンを厳密確認できた場合のみ登録。`ニセゴイシウツボ` を無検証採用しない。
+- `Gymnothorax favagineus` は厳密確認できた場合のみ登録。`ニセゴイシウツボ` を無検証採用しない。
 - `Carassius auratus` を `ギンブナ` と直接対応させない。
+- `Oryzias latipes` はFishPixで地域型表示が競合済み。別の公的資料で種レベルの単一標準和名を厳密確認できない限り登録しない。
+- `Amphilophus citrinellus` はFishPixの交雑表示を和名として採用しない。
 
 ## 変更可能ファイル
-原則:
 - `data/ja-names.js`
 - `data/ja-sources.json`
+- `data/ja-phase3-status.json`
 - `JA_PROGRESS.json`
 - `JA_HANDOFF.md`
-- `scripts/scan-ja-aliases-phase2.js`
-- 必要なら `scripts/audit-ja-aliases.js` のPhase 2対応
+- `scripts/scan-ja-phase3-multisource.js`
+- 必要なら `scripts/audit-ja-aliases.js`
 
-変更禁止:
-- `data/species-*.js`
-- `BATCH_PROGRESS.json`
-- `CHAT_HANDOFF.md`
-- `index.html`
-- `app.js`
-- 候補データ6,000件
+変更禁止: `data/species-*.js`, `BATCH_PROGRESS.json`, `CHAT_HANDOFF.md`, `index.html`, `app.js`, `CODEX_JA_TASK.md`, 候補6,000件。
 
 ## 完了条件
-以下をすべて満たすまで完了報告しないでください。
-- Phase 2開始時点の未対応4,875件を全件走査済み。
-- 全4,875件に最終ステータスあり。
-- 候補総数6,000のまま。
-- 正規化候補重複0。
-- aliasキー候補外0。
-- alias空値0。
-- 重複キー0。
-- 全aliasにsource URLあり。source coverage 100%。
+以下を全部満たすまで完了報告・PR作成しない。
+- 固定入力4,831件を全件処理。
+- 全4,831件に `attempts` と最終ステータスあり。
+- 次に試せる指定優先ソースが残っていない、またはアクセス不能理由を記録済み。
+- 候補総数6,000、正規化重複0。
+- aliasキー候補外0、空値0、重複キー0。
+- 全alias source coverage 100%。
 - 既知の回帰違反0。
 - JS/JSON構文エラー0。
-- `scripts/audit-species.js` が6,000件で成功。
-- `scripts/audit-ja-aliases.js` が成功。
-- 10連抽選で重複なし。
-- 日本語aliasあり/なし双方の表示・コピーが正常。
+- `node scripts/audit-species.js` 成功。
+- `node scripts/audit-ja-aliases.js` 成功。
+- 10連抽選正常、日本語aliasあり/なし双方の表示・コピー正常。
 
-`verified-new` が少数でも問題ありません。**件数を増やすことではなく、4,875件を最後まで調べ切ることが今回の完了条件です。**
+`verified-new` が少なくても問題ありません。**4,831件を複数ソースで最後まで調べ切ることが完了条件です。**
 
-## 完了時
-`JA_PROGRESS.json` と `JA_HANDOFF.md` を実数更新してください。
-
-報告には:
-- Phase 2走査対象数（4,875）
-- 全件処理済み数
-- 新規verified数
-- ソース別採用数
-- 各最終ステータス数
-- verified aliases総数
-- 日本語対応済み総数 / 6,000
-- 未対応数
-- source coverage
-- エラー0または残存エラー詳細
-- 監査結果
-
-を含めてください。
-
-最後にコミットし、PR作成まで進めてください。PR作成APIが使えない場合も、コミットとブランチを作成してUIからPR化できる状態まで進めてください。
+完了時は `JA_PROGRESS.json` / `JA_HANDOFF.md` を実数更新し、ソース別採用数、各最終ステータス数、verified alias総数、日本語対応済み総数 / 6,000、未対応数、source coverage、残存エラーを報告。最後にコミットしPR作成まで進めてください。PR作成APIが使えない場合は、ブランチをGitHubに反映しUIからPR化できる状態まで進めてください。
