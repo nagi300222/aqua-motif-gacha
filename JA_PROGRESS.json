@@ -1,9 +1,8 @@
 {
-  "candidate_total": 2304,
-  "builtin_japanese": null,
-  "verified_aliases": 0,
-  "localized_total": null,
-  "unlocalized": null,
-  "added_this_task": 0,
-  "note": "First Japanese-localization Codex task must measure builtin Japanese coverage and update all null values."
+  "candidate_total": 6000,
+  "builtin_japanese": 604,
+  "verified_aliases": 35,
+  "localized_total": 639,
+  "unlocalized": 5361,
+  "added_this_task": 35
 }
