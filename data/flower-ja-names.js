@@ -790,8 +790,5 @@ Object.assign(window.FLOWER_JA_NAMES, {
   "Prunus × yedoensis": "ソメイヨシノ",
   "Chrysanthemum × morifolium": "キク",
   "Hibiscus × rosa-sinensis": "ブッソウゲ",
-  "Citrus × aurantium": "ダイダイ",
-  "Abelia × grandiflora": "ハナツクバネウツギ",
-  "Saccharum × sinense": "チクトウ",
-  "Prunus × parvifolia": "フユザカラ"
+  "Citrus × aurantium": "ダイダイ"
 });

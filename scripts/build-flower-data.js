@@ -47,8 +47,8 @@ const SOURCES = {
 };
 
 const ANGIOSPERM_ID = '47125'; // Angiospermae in the iNaturalist taxonomy
-const WILD_TARGET = 4300;
-const HYBRID_TARGET = 700;
+const WILD_TARGET = 4909;
+const HYBRID_TARGET = 91; // exactly the NOTABLE_HYBRIDS below, nothing padded in
 const TOTAL_TARGET = WILD_TARGET + HYBRID_TARGET;
 const SEED = 20260820;
 
@@ -71,25 +71,6 @@ const MOTIF_FAMILIES = new Set([
   'Caryophyllaceae', 'Hydrangeaceae', 'Theaceae', 'Oleaceae', 'Convolvulaceae',
   'Onagraceae', 'Geraniaceae', 'Malvaceae', 'Rosaceae', 'Apocynaceae', 'Loasaceae',
   'Nyctaginaceae', 'Plumbaginaceae', 'Polemoniaceae', 'Bignoniaceae', 'Verbenaceae',
-]);
-
-const ORNAMENTAL_GENERA = new Set([
-  'Rosa', 'Tulipa', 'Dahlia', 'Hydrangea', 'Camellia', 'Paeonia', 'Iris', 'Lilium',
-  'Clematis', 'Prunus', 'Chrysanthemum', 'Viola', 'Petunia', 'Dianthus', 'Delphinium',
-  'Fuchsia', 'Hibiscus', 'Magnolia', 'Rhododendron', 'Narcissus', 'Begonia',
-  'Pelargonium', 'Nymphaea', 'Gladiolus', 'Crocus', 'Primula', 'Salvia', 'Aquilegia',
-  'Helleborus', 'Anemone', 'Phlox', 'Lavandula', 'Syringa', 'Weigela', 'Deutzia',
-  'Philadelphus', 'Wisteria', 'Malus', 'Cyclamen', 'Gerbera', 'Zinnia', 'Aster',
-  'Echinacea', 'Hemerocallis', 'Hosta', 'Astilbe', 'Heuchera', 'Geranium', 'Campanula',
-  'Papaver', 'Nepeta', 'Penstemon', 'Verbena', 'Gaillardia', 'Achillea', 'Sedum',
-  'Sempervivum', 'Saxifraga', 'Bergenia', 'Erica', 'Calluna', 'Cattleya', 'Dendrobium',
-  'Phalaenopsis', 'Paphiopedilum', 'Cymbidium', 'Oncidium', 'Miltonia', 'Vanda',
-  'Laelia', 'Epidendrum', 'Odontoglossum', 'Zygopetalum', 'Sarracenia', 'Nepenthes',
-  'Drosera', 'Streptocarpus', 'Sinningia', 'Bougainvillea', 'Plumeria', 'Protea',
-  'Leucadendron', 'Leucospermum', 'Banksia', 'Grevillea', 'Citrus', 'Passiflora',
-  'Abelia', 'Buddleja', 'Ceanothus', 'Cistus', 'Escallonia', 'Forsythia', 'Kalmia',
-  'Lonicera', 'Mahonia', 'Osmanthus', 'Pieris', 'Potentilla', 'Pyracantha', 'Spiraea',
-  'Viburnum', 'Weigelia', 'Aeonium', 'Echeveria', 'Kalanchoe', 'Gasteria', 'Haworthia',
 ]);
 
 // Garden nothotaxa that are household names in horticulture. This list adds no
@@ -428,57 +409,24 @@ function selectWild(species, megatree, aliases, rand) {
   return picked.slice(0, WILD_TARGET);
 }
 
-function selectHybrids(hybrids, aliases, rand) {
-  const taken = new Set();
-  const picked = [];
-  const isOrnamental = (entry) => ORNAMENTAL_GENERA.has(entry.name.replace(/^× /, '').split(' ')[0]);
-  const notable = new Set(NOTABLE_HYBRIDS);
+function selectGardenHybrids(hybrids) {
+  // The garden segment is the named, household-name garden hybrids and nothing
+  // else. Every entry has to be present in the iNaturalist taxonomy; a missing
+  // one is an error rather than something to backfill from the long tail of
+  // wild crosses, so the segment can never be padded to hit a number.
   const byName = new Map(hybrids.map((entry) => [entry.name, entry]));
-  // Household-name garden hybrids, and hybrids a Japanese dictionary already has
-  // a word for, come first so the famous ones are never crowded out by the long
-  // tail of near-identical wild crosses inside the same genus.
-  let notableHits = 0;
+  const picked = [];
+  const missing = [];
   for (const name of NOTABLE_HYBRIDS) {
     const entry = byName.get(name);
-    if (!entry || taken.has(name)) continue;
-    taken.add(name);
-    picked.push(entry);
-    notableHits += 1;
+    if (entry) picked.push(entry);
+    else missing.push(name);
   }
-  for (const entry of hybrids) {
-    if (taken.has(entry.name)) continue;
-    if (!aliases.has(entry.name.replace(' × ', ' ').replace(/^× /, ''))) continue;
-    taken.add(entry.name);
-    picked.push(entry);
+  if (missing.length) {
+    throw new Error(`garden hybrids absent from the source taxonomy: ${missing.join(', ')}`);
   }
-  log(`notable garden hybrids found in source data: ${notableHits}/${NOTABLE_HYBRIDS.length}`);
-  const ornamental = hybrids.filter((entry) => isOrnamental(entry) && !taken.has(entry.name));
-  const rest = hybrids.filter((entry) => !isOrnamental(entry) && !taken.has(entry.name));
-
-  // Famous garden genera first, but capped per genus so a pool of near-identical
-  // Viola or Quercus crosses cannot pad the count.
-  const CAP = 10;
-  const genusOf = (entry) => entry.name.replace(/^× /, '').split(' ')[0];
-  const genusLoad = new Map();
-  for (const entry of picked) genusLoad.set(genusOf(entry), (genusLoad.get(genusOf(entry)) || 0) + 1);
-  for (const [genus, entries] of groupBy(shuffled(ornamental, rand), genusOf)) {
-    const room = Math.max(0, CAP - (genusLoad.get(genus) || 0));
-    for (const entry of shuffled(entries, rand).slice(0, room)) {
-      if (picked.length >= HYBRID_TARGET || taken.has(entry.name)) continue;
-      taken.add(entry.name);
-      picked.push(entry);
-    }
-  }
-  if (picked.length < HYBRID_TARGET) {
-    const families = groupBy(rest, (entry) => entry.family);
-    const budget = HYBRID_TARGET - picked.length;
-    const quotas = allocate(families, budget, (family, entries) => Math.sqrt(entries.length));
-    for (const [family, entries] of families) {
-      picked.push(...takeSpread(entries, quotas.get(family), rand, taken));
-    }
-  }
-  fillTo(HYBRID_TARGET, picked, taken, hybrids, rand);
-  return picked.slice(0, HYBRID_TARGET);
+  log(`garden hybrids: ${picked.length}/${NOTABLE_HYBRIDS.length} confirmed in the source taxonomy`);
+  return picked;
 }
 
 function writeSpeciesFiles(names, header) {
@@ -506,13 +454,13 @@ async function main() {
   const aliases = readJmdict(jmdictFile);
 
   const wild = selectWild(species, megatree, aliases, rand);
-  const garden = selectHybrids(hybrids, aliases, rand);
+  const garden = selectGardenHybrids(hybrids);
   const all = [...wild, ...garden];
   if (all.length !== TOTAL_TARGET) throw new Error(`expected ${TOTAL_TARGET} candidates, built ${all.length}`);
 
   const names = all.map((entry) => entry.name);
   const header = [
-    `// ${TOTAL_TARGET} flower motif candidates: ${WILD_TARGET} wild angiosperm species + ${HYBRID_TARGET} named garden/horticultural hybrid taxa.`,
+    `// ${TOTAL_TARGET} flower motif candidates: ${WILD_TARGET} wild angiosperm species + ${HYBRID_TARGET} well-known garden/horticultural hybrid taxa.`,
     `// Sources: ${SOURCES.inat.label}; ${SOURCES.megatree.label}.`,
     '// Constraints: Angiospermae, active/accepted taxon, rank species (or named nothotaxon),',
     '// binomial only - no sp./spp./cf./aff./var. placeholders. See data/flower-provenance.json.',

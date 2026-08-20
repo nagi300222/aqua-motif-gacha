@@ -13,6 +13,8 @@ const assert = require('assert');
 const root = path.resolve(__dirname, '..');
 const data = path.join(root, 'data');
 const expected = Number(process.argv[2] || 5000);
+const expectedWild = Number(process.argv[3] || 4909);
+const expectedGarden = Number(process.argv[4] || 91);
 
 const speciesFiles = fs.readdirSync(data).filter((file) => /^flower-species-.*\.js$/.test(file)).sort();
 assert(speciesFiles.length > 0, 'no flower species files found');
@@ -54,6 +56,10 @@ fail(malformed.length === 0, `names that are neither a binomial nor a named noth
 const wild = candidates.filter((name) => speciesShape.test(name));
 const garden = candidates.filter((name) => hybridShape.test(name));
 fail(wild.length + garden.length === candidates.length, 'wild + garden split does not cover the pool');
+fail(wild.length === expectedWild, `wild species: expected ${expectedWild}, got ${wild.length}`);
+// The garden segment is a fixed, name-by-name list. Any drift means it was
+// padded out with other hybrids instead of staying the curated set.
+fail(garden.length === expectedGarden, `garden hybrid taxa: expected ${expectedGarden}, got ${garden.length}`);
 
 // The garden segment must not be padded with near-identical names from one
 // genus, so both the plain name and the genus load are checked.
@@ -64,8 +70,8 @@ for (const name of garden) {
   const genus = name.replace(/^× /u, '').split(' ')[0];
   gardenGenera.set(genus, (gardenGenera.get(genus) || 0) + 1);
 }
-const overloaded = [...gardenGenera.entries()].filter(([, count]) => count > 12);
-fail(overloaded.length === 0, `garden genera over the 12-name cap: ${overloaded.map(([g, c]) => `${g}=${c}`).join(', ')}`);
+const overloaded = [...gardenGenera.entries()].filter(([, count]) => count > 6);
+fail(overloaded.length === 0, `garden genera over the 6-name cap: ${overloaded.map(([g, c]) => `${g}=${c}`).join(', ')}`);
 
 const aliasCode = fs.readFileSync(path.join(data, 'flower-ja-names.js'), 'utf8');
 const before = JSON.stringify(candidates);
@@ -107,6 +113,7 @@ console.log(JSON.stringify({
   flower_candidates: candidates.length,
   wild_species: wild.length,
   garden_hybrid_taxa: garden.length,
+  garden_genera: gardenGenera.size,
   empty_names: 0,
   exact_duplicates: 0,
   normalized_duplicates: 0,
