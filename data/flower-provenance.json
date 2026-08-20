@@ -1,0 +1,50 @@
+{
+  "generated_by": "scripts/build-flower-data.js",
+  "total_candidates": 5000,
+  "wild_species": 4909,
+  "garden_hybrid_taxa": 91,
+  "japanese_aliases": 789,
+  "families": 412,
+  "orders": 64,
+  "largest_family_share": "146 (2.9%)",
+  "top_families": {
+    "Asteraceae": 146,
+    "Rosaceae": 127,
+    "Fabaceae": 124,
+    "Orchidaceae": 118,
+    "Poaceae": 93,
+    "Ericaceae": 93,
+    "Ranunculaceae": 70,
+    "Araceae": 62,
+    "Lamiaceae": 61,
+    "Iridaceae": 61,
+    "Brassicaceae": 60,
+    "Apiaceae": 60,
+    "Euphorbiaceae": 55,
+    "Apocynaceae": 54,
+    "Amaryllidaceae": 53
+  },
+  "data_files": [
+    "flower-species-01.js",
+    "flower-species-02.js",
+    "flower-species-03.js",
+    "flower-species-04.js",
+    "flower-species-05.js",
+    "flower-ja-names.js",
+    "flower-ja-sources.json"
+  ],
+  "sources": {
+    "inat": {
+      "url": "https://inaturalist-open-data.s3.amazonaws.com/taxa.csv.gz",
+      "label": "iNaturalist Taxonomy (AWS Open Data, CC0)"
+    },
+    "megatree": {
+      "url": "https://raw.githubusercontent.com/megatrees/plant_20221117/main/plant_megatree.tre",
+      "label": "megatrees/plant_20221117 plant_megatree.tre (Smith & Brown 2018; Jin & Qian 2022)"
+    },
+    "jmdict": {
+      "url": "https://files.pythonhosted.org/packages/97/a5/075928aed2b3b70459fc1db396397dfa6714d266c143c51af9b648551a4e/jamdict_data-1.5.tar.gz",
+      "label": "JMdict/EDICT (EDRDG, CC BY-SA 4.0) via jamdict-data 1.5"
+    }
+  }
+}
